@@ -39,6 +39,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.8rem var(--pad);di
 .nav-menu a{font-family:var(--light);font-size:.72rem;font-weight:200;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);text-decoration:none;opacity:.45;transition:opacity .3s}
 .nav-menu a:hover{opacity:1}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:none;padding:4px}
+.nav-menu{display:none}
+.nav-menu.is-open{
+  display:flex;
+  flex-direction:column;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  align-items:center;
+  justify-content:center;
+  gap:3rem;
+  z-index:150;
+}
+.nav-menu.is-open a{font-size:1.4rem;opacity:.75;letter-spacing:.2em}
+.hamburger{display:flex;z-index:200}
 .hamburger span{
   display:block;
   width:26px;
@@ -181,20 +195,6 @@ footer{padding:3rem var(--pad);border-top:1px solid rgba(201,168,76,.08);display
   .sec-head{flex-direction:column;align-items:flex-start;gap:.5rem}
   footer{flex-direction:column;gap:1.5rem;text-align:center}
   .fnav{flex-wrap:wrap;justify-content:center;gap:1.5rem}
-  .nav-menu{display:none}
-  .nav-menu.is-open{
-    display:flex;
-    flex-direction:column;
-    position:fixed;
-    inset:0;
-    background:var(--bg);
-    align-items:center;
-    justify-content:center;
-    gap:3rem;
-    z-index:150;
-  }
-  .nav-menu.is-open a{font-size:1.4rem;opacity:.75;letter-spacing:.2em}
-  .hamburger{display:flex;z-index:200}
   html,body{cursor:auto}
   .cursor,.cursor-ring{display:none}
 }
@@ -439,7 +439,6 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;C.style.cssT
 (function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;R.style.cssText=`left:${rx}px;top:${ry}px`;requestAnimationFrame(loop)})();
 window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('done'),2100));
 const hb=document.getElementById('hb'),nm=document.getElementById('nm');
-const mobileMenu = window.matchMedia('(max-width: 900px)');
 function setMenuOpen(isOpen) {
   hb.setAttribute('aria-expanded', String(isOpen));
   hb.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
@@ -451,7 +450,6 @@ hb.addEventListener('click', () => {
 nm.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => setMenuOpen(false));
 });
-mobileMenu.addEventListener('change', () => setMenuOpen(false));
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && hb.getAttribute('aria-expanded') === 'true') {
     setMenuOpen(false);
