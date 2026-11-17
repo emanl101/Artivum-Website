@@ -39,7 +39,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.8rem var(--pad);di
 .nav-menu a{font-family:var(--light);font-size:.72rem;font-weight:200;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);text-decoration:none;opacity:.45;transition:opacity .3s}
 .nav-menu a:hover{opacity:1}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:none;padding:4px}
-.hamburger span{display:block;width:26px;height:1px;background:var(--cream)}
+.hamburger span{
+  display:block;
+  width:26px;
+  height:1px;
+  background:var(--cream);
+  transition:transform .25s ease,opacity .2s ease;
+}
+.hamburger[aria-expanded="true"] span:first-child{transform:translateY(6px) rotate(45deg)}
+.hamburger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.hamburger[aria-expanded="true"] span:last-child{transform:translateY(-6px) rotate(-45deg)}
+@media(prefers-reduced-motion:reduce){
+  .hamburger span{transition:none}
+}
 
 /* HERO */
 #hero{min-height:100vh;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--pad) 8rem;overflow:hidden}
@@ -170,6 +182,18 @@ footer{padding:3rem var(--pad);border-top:1px solid rgba(201,168,76,.08);display
   footer{flex-direction:column;gap:1.5rem;text-align:center}
   .fnav{flex-wrap:wrap;justify-content:center;gap:1.5rem}
   .nav-menu{display:none}
+  .nav-menu.is-open{
+    display:flex;
+    flex-direction:column;
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    align-items:center;
+    justify-content:center;
+    gap:3rem;
+    z-index:150;
+  }
+  .nav-menu.is-open a{font-size:1.4rem;opacity:.75;letter-spacing:.2em}
   .hamburger{display:flex;z-index:200}
   html,body{cursor:auto}
   .cursor,.cursor-ring{display:none}
@@ -199,7 +223,7 @@ footer{padding:3rem var(--pad);border-top:1px solid rgba(201,168,76,.08);display
     <li><a href="#about">Studio</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
   </ul>
-  <button class="hamburger" id="hb" aria-label="Menü">
+  <button class="hamburger" id="hb" type="button" aria-label="Menü öffnen" aria-controls="nm" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -415,13 +439,25 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;C.style.cssT
 (function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;R.style.cssText=`left:${rx}px;top:${ry}px`;requestAnimationFrame(loop)})();
 window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('done'),2100));
 const hb=document.getElementById('hb'),nm=document.getElementById('nm');
-hb.addEventListener('click',()=>{
-  const o=nm.dataset.open==='1';
-  nm.dataset.open=o?'0':'1';
-  nm.style.cssText=o?'':'display:flex;flex-direction:column;position:fixed;inset:0;background:#0a0906;align-items:center;justify-content:center;gap:3rem;z-index:150';
-  if(!o)nm.querySelectorAll('a').forEach(a=>a.style.cssText='font-size:1.4rem;opacity:.75;letter-spacing:.2em');
+const mobileMenu = window.matchMedia('(max-width: 900px)');
+function setMenuOpen(isOpen) {
+  hb.setAttribute('aria-expanded', String(isOpen));
+  hb.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
+  nm.classList.toggle('is-open', isOpen);
+}
+hb.addEventListener('click', () => {
+  setMenuOpen(hb.getAttribute('aria-expanded') !== 'true');
 });
-nm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nm.style.display='none';nm.dataset.open='0'}));
+nm.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => setMenuOpen(false));
+});
+mobileMenu.addEventListener('change', () => setMenuOpen(false));
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && hb.getAttribute('aria-expanded') === 'true') {
+    setMenuOpen(false);
+    hb.focus();
+  }
+});
 const rvs=document.querySelectorAll('.rv');
 const obs=new IntersectionObserver(entries=>entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*70);obs.unobserve(e.target)}}),{threshold:.1});
 rvs.forEach(r=>obs.observe(r));
